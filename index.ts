@@ -5,6 +5,8 @@ const Humidifier = require('./Modules/type_04.js');
 const AirPurifier = require('./Modules/type_05.js');
 const Fan = require('./Modules/type_07.js');
 
+import {DynamicPlatformPlugin, PlatformAccessory, API, Service, Characteristic, Logger, PlatformConfig} from 'homebridge';
+
 async function getSavedRemotes () {
     const info = await server();
     const remotes = [];
@@ -22,16 +24,21 @@ module.exports = (api) => {
     api.registerPlatform('homebridge-remote-ir-test', "Platform", Platform);
 }
 
-module.exports = class Platform {
-    constructor (log, config, api) {
-        this.log = log;
+export class Platform implements DynamicPlatformPlugin{
+    constructor (
+        public readonly log: Logger,
+        public readonly config: PlatformConfig,
+        public readonly api: API,
+        private myAccessories: [])
+        {
+        
         this.config = config;
         this.api = api;
         this.myAccessories = [];
 
         this.api.on('didFinishLaunching', async () => {
         const remotes = await getSavedRemotes();
-        this.log('REMOTES:', remotes);
+        this.log.info('REMOTES:', remotes);
             remotes.forEach(item => {
                 switch (item.Type) {
                     case '03': {
@@ -47,7 +54,7 @@ module.exports = class Platform {
             });
         });
     }
-    configureAccessories (accessory) {
+    configureAccessory (accessory: PlatformAccessory) {
         this.myAccessories.push(accessory);
     }
 
@@ -55,7 +62,3 @@ module.exports = class Platform {
        return this.myAccessories;
     }
 }
-
-
-
-
