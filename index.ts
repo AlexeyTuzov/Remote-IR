@@ -48,6 +48,7 @@ export class Platform implements DynamicPlatformPlugin {
         this.config = config;
         this.api = api;
         this.myAccessories = [];
+        this.Characteristic = this.api.hap.Characteristic;
 
         this.api.on('didFinishLaunching', async () => {
             const remotes = await getSavedRemotes();

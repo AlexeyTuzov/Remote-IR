@@ -1,10 +1,11 @@
 import * as httpRequest from '../Utilites/httpRequest.js';
-import {Service, PlatformAccessory, API} from 'homebridge';
+import {Service, PlatformAccessory, Characteristic, API} from 'homebridge';
 import {Platform} from '../index.js'
 
 export class Lightbulb {
 
-    private readonly Service: Service;
+    protected readonly service: Service
+    protected readonly Characteristic: Characteristic;
     private readonly api: API;
     private readonly accessory: PlatformAccessory;
     private readonly currentActiveStatus: boolean;
@@ -12,8 +13,8 @@ export class Lightbulb {
     private readonly IP: string;
     private readonly uuid: string;
     private readonly path: string;
-    private readonly command: string;
-    private readonly msg: string;
+    private command: string;
+    private msg: string;
 
     constructor(IP: string, name: string, UUID: string, api: API, accessory: PlatformAccessory) {
 
@@ -27,12 +28,9 @@ export class Lightbulb {
         this.command = '';
         this.msg = '';
 
-        this.Service = this.api.hap.Service.Lightbulb;
-        console.log('this.Service', this.Service);
+        this.service = new this.api.hap.Service.Lightbulb(`Light bulb ${this.uuid}`);
 
-        this.service = this.accessory.getService.Lightbulb || this.accessory.addService.Lightbulb;
-
-        this.service.getCharacteristic(this.Characteristic.On)
+        this.service.getCharacteristic('On')
             .onGet(this.onGetHandler.bind(this))
             .onSet(this.onSetHandler.bind(this));
     }
