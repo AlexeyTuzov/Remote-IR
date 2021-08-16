@@ -1,13 +1,10 @@
-import * as httpRequest from '../Utilites/httpRequest.js';
-import {Service, PlatformAccessory, Characteristic, API} from 'homebridge';
+const httpRequest: any = require('../Utilites/httpRequest.js');
+import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js'
 
 export class Lightbulb {
 
-    protected readonly service: Service
-    protected readonly Characteristic: Characteristic;
-    private readonly api: API;
-    private readonly accessory: PlatformAccessory;
+    protected readonly service: Service;
     private readonly currentActiveStatus: boolean;
     private readonly name: string;
     private readonly IP: string;
@@ -16,21 +13,22 @@ export class Lightbulb {
     private command: string;
     private msg: string;
 
-    constructor(IP: string, name: string, UUID: string, api: API, accessory: PlatformAccessory) {
+    constructor(
+        private readonly platform: Platform,
+        private readonly accessory: PlatformAccessory
+    ) {
 
-        this.api = api;
         this.accessory = accessory;
         this.currentActiveStatus = false;
-        this.name = name;
-        this.IP = IP;
-        this.uuid = UUID;
+        this.name = this.accessory.context.name;
+        this.IP = this.accessory.context.IP;
+        this.uuid = this.accessory.context.UUID;
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
         this.msg = '';
+        this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
 
-        this.service = new this.api.hap.Service.Lightbulb(`Light bulb ${this.uuid}`);
-
-        this.service.getCharacteristic('On')
+        this.service.getCharacteristic('On')!
             .onGet(this.onGetHandler.bind(this))
             .onSet(this.onSetHandler.bind(this));
     }
@@ -43,7 +41,7 @@ export class Lightbulb {
         return this.currentActiveStatus;
     }
 
-    onSetHandler(value) {
+    onSetHandler(value: any) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
         httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentActiveStatus, this.msg);
