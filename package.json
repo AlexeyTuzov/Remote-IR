@@ -1,6 +1,6 @@
 {
   "name": "homebridge-remote-ir-test",
-  "version": "1.0.80",
+  "version": "1.1.8",
   "description": "plug-in 4 Homebridge remote IR controller",
   "main": "src/index.js",
   "keywords": [

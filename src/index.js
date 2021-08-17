@@ -39,6 +39,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Platform = void 0;
 var server = require('./server');
 var type_03_js_1 = require("./Modules/type_03.js");
+var type_04_js_1 = require("./Modules/type_04.js");
+var type_05_js_1 = require("./Modules/type_05.js");
+var type_06_js_1 = require("./Modules/type_06.js");
+var type_07_js_1 = require("./Modules/type_07.js");
+module.exports = function (api) {
+    api.registerPlatform('homebridge-remote-ir-test', "Platform", Platform);
+};
 function getSavedRemotes() {
     return __awaiter(this, void 0, void 0, function () {
         var info, remotes;
@@ -58,9 +65,6 @@ function getSavedRemotes() {
         });
     });
 }
-module.exports = function (api) {
-    api.registerPlatform('homebridge-remote-ir-test', "Platform", Platform);
-};
 var Platform = /** @class */ (function () {
     function Platform(log, config, api, myAccessories) {
         var _this = this;
@@ -82,18 +86,91 @@ var Platform = /** @class */ (function () {
                     case 0: return [4 /*yield*/, getSavedRemotes()];
                     case 1:
                         remotes = _a.sent();
-                        //this.log.info('REMOTES:', remotes);
+                        this.log.info('REMOTES:', remotes);
                         remotes.forEach(function (item) {
                             switch (item.Type) {
                                 case '03': {
-                                    var accUUID = api.hap.uuid.generate("item.UUID");
-                                    var accessory = new _this.api.platformAccessory("Lightbulb UUID: " + item.UUID, accUUID);
-                                    //new Lightbulb(item.IP, `Lightbulb UUID: ${item.UUID}`, item.UUID, this.api, accessory);
-                                    accessory.context.IP = item.IP;
-                                    accessory.context.name = "Lightbulb UUID: " + item.UUID;
-                                    accessory.context.UUID = item.UUID;
-                                    new type_03_js_1.Lightbulb(_this, accessory);
-                                    _this.api.registerPlatformAccessories('homebridge-remote-ir-test', "" + _this.config.name, [accessory]);
+                                    var accUUID_1 = api.hap.uuid.generate("" + item.UUID);
+                                    var existingAccessory = _this.myAccessories.find(function (accessory) { return accessory.UUID === accUUID_1; });
+                                    if (existingAccessory) {
+                                        new type_03_js_1.Lightbulb(_this, existingAccessory);
+                                    }
+                                    else {
+                                        var accessory = new _this.api.platformAccessory("Lightbulb UUID: " + item.UUID, accUUID_1);
+                                        accessory.context.IP = item.IP;
+                                        accessory.context.name = "Lightbulb UUID: " + item.UUID;
+                                        accessory.context.UUID = item.UUID;
+                                        new type_03_js_1.Lightbulb(_this, accessory);
+                                        _this.api.registerPlatformAccessories('homebridge-remote-ir-test', "" + _this.config.name, [accessory]);
+                                    }
+                                    break;
+                                }
+                                case '04': {
+                                    var accUUID_2 = api.hap.uuid.generate("" + item.UUID);
+                                    var existingAccessory = _this.myAccessories.find(function (accessory) { return accessory.UUID === accUUID_2; });
+                                    if (existingAccessory) {
+                                        new type_04_js_1.Humidifier(_this, existingAccessory);
+                                    }
+                                    else {
+                                        var accessory = new _this.api.platformAccessory("Humidifier UUID: " + item.UUID, accUUID_2);
+                                        accessory.context.IP = item.IP;
+                                        accessory.context.name = "Humidifier UUID: " + item.UUID;
+                                        accessory.context.UUID = item.UUID;
+                                        new type_04_js_1.Humidifier(_this, accessory);
+                                        _this.configureAccessory(accessory);
+                                        _this.api.registerPlatformAccessories('homebridge-remote-ir-test', "" + _this.config.name, [accessory]);
+                                    }
+                                    break;
+                                }
+                                case '05': {
+                                    var accUUID_3 = api.hap.uuid.generate("" + item.UUID);
+                                    var existingAccessory = _this.myAccessories.find(function (accessory) { return accessory.UUID === accUUID_3; });
+                                    if (existingAccessory) {
+                                        new type_05_js_1.AirPurifier(_this, existingAccessory);
+                                    }
+                                    else {
+                                        var accessory = new _this.api.platformAccessory("Air Purifier UUID: " + item.UUID, accUUID_3);
+                                        accessory.context.IP = item.IP;
+                                        accessory.context.name = "Air Purifier UUID: " + item.UUID;
+                                        accessory.context.UUID = item.UUID;
+                                        new type_05_js_1.AirPurifier(_this, accessory);
+                                        _this.configureAccessory(accessory);
+                                        _this.api.registerPlatformAccessories('homebridge-remote-ir-test', "" + _this.config.name, [accessory]);
+                                    }
+                                    break;
+                                }
+                                case '06': {
+                                    var accUUID_4 = api.hap.uuid.generate("" + item.UUID);
+                                    var existingAccessory = _this.myAccessories.find(function (accessory) { return accessory.UUID === accUUID_4; });
+                                    if (existingAccessory) {
+                                        new type_06_js_1.Switch(_this, existingAccessory);
+                                    }
+                                    else {
+                                        var accessory = new _this.api.platformAccessory("Switch UUID: " + item.UUID, accUUID_4);
+                                        accessory.context.IP = item.IP;
+                                        accessory.context.name = "Switch UUID: " + item.UUID;
+                                        accessory.context.UUID = item.UUID;
+                                        new type_06_js_1.Switch(_this, accessory);
+                                        _this.configureAccessory(accessory);
+                                        _this.api.registerPlatformAccessories('homebridge-remote-ir-test', "" + _this.config.name, [accessory]);
+                                    }
+                                    break;
+                                }
+                                case '07': {
+                                    var accUUID_5 = api.hap.uuid.generate("" + item.UUID);
+                                    var existingAccessory = _this.myAccessories.find(function (accessory) { return accessory.UUID === accUUID_5; });
+                                    if (existingAccessory) {
+                                        new type_07_js_1.Fan(_this, existingAccessory);
+                                    }
+                                    else {
+                                        var accessory = new _this.api.platformAccessory("Fan UUID: " + item.UUID, accUUID_5);
+                                        accessory.context.IP = item.IP;
+                                        accessory.context.name = "Fan UUID: " + item.UUID;
+                                        accessory.context.UUID = item.UUID;
+                                        new type_07_js_1.Fan(_this, accessory);
+                                        _this.configureAccessory(accessory);
+                                        _this.api.registerPlatformAccessories('homebridge-remote-ir-test', "" + _this.config.name, [accessory]);
+                                    }
                                     break;
                                 }
                                 default:

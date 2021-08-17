@@ -1,74 +1,61 @@
-const httpRequest = require('../Utilites/httpRequest.js');
-
-class Fan {
-    constructor(log, config, api) {
-        this.log = log;
-        this.config = config;
-        this.api = api;
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Fan = void 0;
+var httpRequest = require('../Utilites/httpRequest.js');
+var Fan = /** @class */ (function () {
+    function Fan(platform, accessory) {
+        this.platform = platform;
+        this.accessory = accessory;
         this.currentActiveStatus = false;
         this.currentSwing = 0;
         this.currentSpeed = 0;
-        this.name = config.name;
-        this.IP = config.IP;
-        this.uuid = config.UUID;
-        this.path = `/commands/ir/localremote/${this.uuid}`;
+        this.name = this.accessory.context.name;
+        this.IP = this.accessory.context.IP;
+        this.uuid = this.accessory.context.UUID;
+        this.path = "/commands/ir/localremote/" + this.uuid;
         this.command = '';
         this.msg = '';
-
-        this.Service = this.api.hap.Service;
-        this.Characteristic = this.api.hap.Characteristic;
-        this.service = new this.Service.Fanv2(this.name);
-
-        this.service.getCharacteristic(this.Characteristic.Active)
+        this.service = this.accessory.getService(this.platform.Service.Fanv2) || this.accessory.addService(this.platform.Service.Fanv2);
+        this.service.getCharacteristic(this.platform.Characteristic.Active)
             .onGet(this.onGetActive.bind(this))
             .onSet(this.onSetActive.bind(this));
-
-        this.service.getCharacteristic(this.Characteristic.SwingMode)
+        this.service.getCharacteristic(this.platform.Characteristic.SwingMode)
             .onGet(this.onGetSwingMode.bind(this))
             .onSet(this.onSetSwingMode.bind(this));
-
-        this.service.getCharacteristic(this.Characteristic.RotationSpeed)
+        this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
             .onGet(this.onGetSpeed.bind(this))
             .onSet(this.onSetSpeed.bind(this));
     }
-
-    getServices() {
+    Fan.prototype.getServices = function () {
         return [this.service];
-    }
-
-    onGetActive() {
+    };
+    Fan.prototype.onGetActive = function () {
         return this.currentActiveStatus;
-    }
-
-    onSetActive(value) {
+    };
+    Fan.prototype.onSetActive = function (value) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentActiveStatus, this.msg);
+        httpRequest(this.IP, "" + this.path + this.command, value, this.currentActiveStatus, this.msg);
         return this.currentActiveStatus;
-    }
-
-    onGetSwingMode () {
-        return this.Characteristic.SwingMode.SWING_DISABLED;
-    }
-
-    onSetSwingMode (value) {
+    };
+    Fan.prototype.onGetSwingMode = function () {
+        return this.platform.Characteristic.SwingMode.SWING_DISABLED;
+    };
+    Fan.prototype.onSetSwingMode = function (value) {
         this.command = '0AFF';
         this.msg = 'Swing mode';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentSwing, this.msg);
+        httpRequest(this.IP, "" + this.path + this.command, value, this.currentSwing, this.msg);
         return this.currentSwing;
-    }
-
-    onGetSpeed () {
+    };
+    Fan.prototype.onGetSpeed = function () {
         return this.currentSpeed;
-    }
-
-    onSetSpeed (value) {
+    };
+    Fan.prototype.onSetSpeed = function (value) {
         this.command = '0BFF';
         this.msg = 'Rotation speed';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentSpeed, this.msg);
+        httpRequest(this.IP, "" + this.path + this.command, value, this.currentSpeed, this.msg);
         return this.currentSpeed;
-    }
-}
-
-module.exports = Fan;
+    };
+    return Fan;
+}());
+exports.Fan = Fan;

@@ -2,7 +2,7 @@ const httpRequest: any = require('../Utilites/httpRequest.js');
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
 
-export class Lightbulb {
+export class Switch {
 
     protected readonly service: Service;
     private readonly currentActiveStatus: boolean;
@@ -25,7 +25,8 @@ export class Lightbulb {
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
         this.msg = '';
-        this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
+
+        this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
 
         this.service.getCharacteristic(this.platform.Characteristic.On)!
             .onGet(this.onGetHandler.bind(this))
@@ -46,6 +47,4 @@ export class Lightbulb {
         httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentActiveStatus, this.msg);
         return this.currentActiveStatus;
     }
-
 }
-

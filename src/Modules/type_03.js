@@ -6,7 +6,6 @@ var Lightbulb = /** @class */ (function () {
     function Lightbulb(platform, accessory) {
         this.platform = platform;
         this.accessory = accessory;
-        this.accessory = accessory;
         this.currentActiveStatus = false;
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
@@ -15,7 +14,7 @@ var Lightbulb = /** @class */ (function () {
         this.command = '';
         this.msg = '';
         this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
-        this.service.getCharacteristic('On')
+        this.service.getCharacteristic(this.platform.Characteristic.On)
             .onGet(this.onGetHandler.bind(this))
             .onSet(this.onSetHandler.bind(this));
     }

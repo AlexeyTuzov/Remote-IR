@@ -1,41 +1,35 @@
-const httpRequest = require('../Utilites/httpRequest.js');
-
-class Switch {
-    constructor(log, config, api) {
-        this.log = log;
-        this.config = config;
-        this.api = api;
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Switch = void 0;
+var httpRequest = require('../Utilites/httpRequest.js');
+var Switch = /** @class */ (function () {
+    function Switch(platform, accessory) {
+        this.platform = platform;
+        this.accessory = accessory;
         this.currentActiveStatus = false;
-        this.name = config.name;
-        this.IP = config.IP;
-        this.uuid = config.UUID;
-        this.path = `/commands/ir/localremote/${this.uuid}`;
+        this.name = this.accessory.context.name;
+        this.IP = this.accessory.context.IP;
+        this.uuid = this.accessory.context.UUID;
+        this.path = "/commands/ir/localremote/" + this.uuid;
         this.command = '';
         this.msg = '';
-
-        this.Service = this.api.hap.Service;
-        this.Characteristic = this.api.hap.Characteristic;
-        this.service = new this.Service.Switch(this.name);
-        this.service.getCharacteristic(this.Characteristic.On)
+        this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+        this.service.getCharacteristic(this.platform.Characteristic.On)
             .onGet(this.onGetHandler.bind(this))
             .onSet(this.onSetHandler.bind(this));
     }
-
-    getServices() {
+    Switch.prototype.getServices = function () {
         return [this.service];
-    }
-
-    onGetHandler() {
+    };
+    Switch.prototype.onGetHandler = function () {
         return this.currentActiveStatus;
-    }
-
-    onSetHandler(value) {
+    };
+    Switch.prototype.onSetHandler = function (value) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentActiveStatus, this.msg);
+        httpRequest(this.IP, "" + this.path + this.command, value, this.currentActiveStatus, this.msg);
         return this.currentActiveStatus;
-    }
-}
-
-module.exports = Switch;
+    };
+    return Switch;
+}());
+exports.Switch = Switch;
