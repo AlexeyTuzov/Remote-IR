@@ -27,8 +27,7 @@ var Lightbulb = /** @class */ (function () {
     Lightbulb.prototype.onSetHandler = function (value) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, "" + this.path + this.command, value, this.currentActiveStatus, this.msg);
-        return this.currentActiveStatus;
+        this.currentActiveStatus = httpRequest(this.IP, "" + this.path + this.command, value, this.msg);
     };
     return Lightbulb;
 }());

@@ -3,11 +3,11 @@ module.exports = async () => {
     const server = dgram.createSocket({type: 'udp4', reuseAddr: true});
     const parseRemotesAnswer = require('./Utilites/parseRemotesAnswer.js');
     const getRemoteControllers = require('./Utilites/getRemoteControllers.js');
-    const getAllCommands = require('./Utilites/getAllCommands.js');
+    const getCommands = require('./Utilites/getCommands.js');
     const PORT = 61201;
     const discover = 'LOOK.in:Discover!';
     const ALIVE = 'LOOK.in:Alive!';
-    const IP = '192.168.100.2';
+    const IP = '255.255.255.255';
     const devicesArray = [];
 
     return await new Promise((resolve, reject) => {
@@ -36,10 +36,14 @@ module.exports = async () => {
                     device.savedRC = JSON.parse(savedRemoteControllers);
 
                     if (device.savedRC instanceof Array) {
-                        device.Commands = await getAllCommands(IP, device.savedRC);
                         device.savedRC.forEach( item => {
                             item.IP = device.IP;
                         });
+                        for await (let item of device.savedRC) {
+                            if (item.Type === '01') {
+                                item.deviceInfo = JSON.parse( await getCommands(item.IP, item.UUID));
+                            }
+                        }
                     }
 
                     if (!devicesArray.find(item => item.ID === device.ID)) {
@@ -55,7 +59,6 @@ module.exports = async () => {
             sendDiscoverSignal(discover, PORT);
         });
 
-//in this function IP address is hardcoded! It is needed to be read from Network
         function sendDiscoverSignal(msg, port) {
             server.setBroadcast(true);
             server.send(Buffer.from(msg), port, IP, (err) => {

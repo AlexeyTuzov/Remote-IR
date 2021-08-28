@@ -1,8 +1,8 @@
 const http = require('http');
 
-const getCommands = async (IP, UUID) => {
+const getCommands = (IP, UUID) => {
 
-    let query = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         http.get({host: IP, path: `/data/${UUID}`}, res => {
             let data = '';
 
@@ -13,12 +13,11 @@ const getCommands = async (IP, UUID) => {
                 resolve(data);
             });
         }).on('error', err => {
-            reject(console.error('Something is gone wrong!', err.stack));
+            reject(console.error('Something is gone wrong getting commands!', err.stack));
         });
     });
+};
 
-    return await query;
-}
 
 module.exports = getCommands;
 

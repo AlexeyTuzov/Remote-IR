@@ -5,9 +5,9 @@ import {Platform} from '../index.js';
 export class Fan {
 
     protected readonly service: Service;
-    private readonly currentActiveStatus: boolean;
-    private readonly currentSwing: number;
-    private readonly currentSpeed: number;
+    private currentActiveStatus: boolean;
+    private currentSwing: number;
+    private currentSpeed: number;
     private readonly name: string;
     private readonly IP: string;
     private readonly uuid: string;
@@ -56,8 +56,7 @@ export class Fan {
     onSetActive(value: any) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentActiveStatus, this.msg);
-        return this.currentActiveStatus;
+        this.currentActiveStatus = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 
     onGetSwingMode () {
@@ -67,8 +66,7 @@ export class Fan {
     onSetSwingMode (value: any) {
         this.command = '0AFF';
         this.msg = 'Swing mode';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentSwing, this.msg);
-        return this.currentSwing;
+        this.currentSwing = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 
     onGetSpeed () {
@@ -78,7 +76,6 @@ export class Fan {
     onSetSpeed (value: any) {
         this.command = '0BFF';
         this.msg = 'Rotation speed';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentSpeed, this.msg);
-        return this.currentSpeed;
+        this.currentSpeed = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 }

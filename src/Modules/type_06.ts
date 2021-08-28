@@ -5,7 +5,7 @@ import {Platform} from '../index.js';
 export class Switch {
 
     protected readonly service: Service;
-    private readonly currentActiveStatus: boolean;
+    private currentActiveStatus: boolean;
     private readonly name: string;
     private readonly IP: string;
     private readonly uuid: string;
@@ -44,7 +44,6 @@ export class Switch {
     onSetHandler(value: any) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentActiveStatus, this.msg);
-        return this.currentActiveStatus;
+        this.currentActiveStatus = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 }

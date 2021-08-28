@@ -7,8 +7,8 @@ var AirPurifier = /** @class */ (function () {
         this.platform = platform;
         this.accessory = accessory;
         this.currentActiveStatus = false;
-        this.currentState = 0;
-        this.currentSpeed = 0;
+        //this.currentState = 0;
+        //this.currentSpeed = 0;
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
         this.uuid = this.accessory.context.UUID;
@@ -19,14 +19,16 @@ var AirPurifier = /** @class */ (function () {
         this.service.getCharacteristic(this.platform.Characteristic.Active)
             .onGet(this.onGetActive.bind(this))
             .onSet(this.onSetActive.bind(this));
-        this.service.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
-            .onGet(this.onGetCurrentState.bind(this));
-        this.service.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
-            .onGet(this.onGetTargetState.bind(this))
-            .onSet(this.onSetTargetState.bind(this));
-        this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-            .onGet(this.onGetRotationSpeed.bind(this))
-            .onSet(this.onSetRotationSpeed.bind(this));
+        // ============the following functionality has not been realised yet============================================
+        //this.service.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)!
+        //    .onGet(this.onGetCurrentState.bind(this));
+        this.service.setCharacteristic(this.platform.Characteristic.TargetAirPurifierState, this.platform.Characteristic.TargetAirPurifierState.AUTO);
+        //this.service.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)!
+        //    .onGet(this.onGetTargetState.bind(this))
+        //    .onSet(this.onSetTargetState.bind(this));
+        //this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)!
+        //    .onGet(this.onGetRotationSpeed.bind(this))
+        //    .onSet(this.onSetRotationSpeed.bind(this));
     }
     AirPurifier.prototype.getServices = function () {
         return [this.service];
@@ -37,30 +39,7 @@ var AirPurifier = /** @class */ (function () {
     AirPurifier.prototype.onSetActive = function (value) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, "" + this.path + this.command, value, this.currentActiveStatus, this.msg);
-        return this.currentActiveStatus;
-    };
-    AirPurifier.prototype.onGetCurrentState = function () {
-        return this.platform.Characteristic.CurrentAirPurifierState.INACTIVE;
-    };
-    AirPurifier.prototype.onGetTargetState = function () {
-        console.log("Target Air Purifier Mode: " + this.platform.Characteristic.TargetAirPurifierState.AUTO);
-        return this.platform.Characteristic.TargetAirPurifierState.AUTO;
-    };
-    AirPurifier.prototype.onSetTargetState = function (value) {
-        this.command = '04FF';
-        this.msg = 'Current Air Purifier state';
-        httpRequest(this.IP, this.path, value, this.currentState, this.msg);
-        return this.currentState;
-    };
-    AirPurifier.prototype.onGetRotationSpeed = function () {
-        return this.currentSpeed;
-    };
-    AirPurifier.prototype.onSetRotationSpeed = function (value) {
-        this.command = '0BFF';
-        this.msg = 'Rotation speed';
-        httpRequest(this.IP, this.path, value, this.currentSpeed, this.msg);
-        return this.currentSpeed;
+        this.currentActiveStatus = httpRequest(this.IP, "" + this.path + this.command, value, this.msg);
     };
     return AirPurifier;
 }());

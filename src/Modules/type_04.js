@@ -7,7 +7,7 @@ var Humidifier = /** @class */ (function () {
         this.platform = platform;
         this.accessory = accessory;
         this.currentActiveStatus = false;
-        this.currentHDstate = 0;
+        //this.currentHDState = 0;
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
         this.uuid = this.accessory.context.UUID;
@@ -18,11 +18,12 @@ var Humidifier = /** @class */ (function () {
         this.service.getCharacteristic(this.platform.Characteristic.Active)
             .onGet(this.onGetActive.bind(this))
             .onSet(this.onSetActive.bind(this));
-        this.service.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)
-            .onGet(this.onGetHDState.bind(this));
-        this.service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState)
-            .onGet(this.onGetTargetState.bind(this))
-            .onSet(this.onSetTargetState.bind(this));
+        // ============the following functionality has not been realised yet============================================
+        //this.service.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)!
+        //    .onGet(this.onGetHDState.bind(this));
+        //this.service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState)!
+        //    .onGet(this.onGetTargetState.bind(this))
+        //    .onSet(this.onSetTargetState.bind(this));
     }
     Humidifier.prototype.getServices = function () {
         return [this.service];
@@ -33,21 +34,7 @@ var Humidifier = /** @class */ (function () {
     Humidifier.prototype.onSetActive = function (value) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, "" + this.path + this.command, value, this.currentActiveStatus, this.msg);
-        return this.currentActiveStatus;
-    };
-    Humidifier.prototype.onGetHDState = function () {
-        return this.platform.Characteristic.CurrentHumidifierDehumidifierState.INACTIVE;
-    };
-    Humidifier.prototype.onGetTargetState = function () {
-        console.log("Target H-D Mode: " + this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
-        return this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER;
-    };
-    Humidifier.prototype.onSetTargetState = function (value) {
-        this.command = '04FF';
-        this.msg = 'Humidifier-Dehumidifier mode';
-        httpRequest(this.IP, this.path, value, this.currentHDstate, this.msg);
-        return this.currentHDstate;
+        this.currentActiveStatus = httpRequest(this.IP, "" + this.path + this.command, value, this.msg);
     };
     return Humidifier;
 }());

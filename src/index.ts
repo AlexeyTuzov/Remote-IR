@@ -1,4 +1,6 @@
-const server: any = require ('./server');
+const server: any = require('./server');
+
+import {TV} from './Modules/type_01.js';
 import {Lightbulb} from './Modules/type_03.js';
 import {Humidifier} from './Modules/type_04.js';
 import {AirPurifier} from './Modules/type_05.js';
@@ -16,7 +18,6 @@ import {
 } from 'homebridge';
 
 module.exports = (api: any) => {
-
     api.registerPlatform('homebridge-remote-ir-test', "Platform", Platform);
 }
 
@@ -24,17 +25,26 @@ interface Remote {
     Type: string;
     UUID: string;
     Updated: number;
-    IP: string
+    IP: string;
+    deviceInfo: [] | undefined;
+}
+
+interface ServerAnswer {
+    ID: string;
+    type: string;
+    onBatteries: string;
+    IP: string;
+    autoVersion: string;
+    storageVersion: string;
+    savedRC: Remote[];
 }
 
 async function getSavedRemotes() {
-    const info: any = await server();
+    const info: ServerAnswer[] = await server();
     let remotes: Remote[] = [];
-    if (info instanceof Array) {
-        info.forEach(item => {
-            remotes.push(...item.savedRC);
-        });
-    }
+    info.forEach(item => {
+        remotes.push(...item.savedRC);
+    });
     return remotes;
 }
 
@@ -60,83 +70,28 @@ export class Platform implements DynamicPlatformPlugin {
             this.log.info('REMOTES:', remotes);
             remotes.forEach(item => {
                 switch (item.Type) {
+                    case '01': {
+                        this.addAccessory('TV', TV, item);
+                        break;
+                    }
                     case '03': {
-                        const accUUID = api.hap.uuid.generate(`${item.UUID}`);
-                        const existingAccessory: PlatformAccessory = this.myAccessories.find( accessory => accessory.UUID === accUUID)!;
-                        if (existingAccessory) {
-                            new Lightbulb(this, existingAccessory);
-                        } else {
-                            const accessory: PlatformAccessory = new this.api.platformAccessory(`Lightbulb UUID: ${item.UUID}`, accUUID);
-                            accessory.context.IP = item.IP;
-                            accessory.context.name = `Lightbulb UUID: ${item.UUID}`;
-                            accessory.context.UUID = item.UUID;
-                            new Lightbulb(this, accessory);
-                            this.api.registerPlatformAccessories('homebridge-remote-ir-test', `${this.config.name}`, [accessory]);
-                        }
+                        this.addAccessory('Lightbulb', Lightbulb, item);
                         break;
                     }
                     case '04': {
-                        const accUUID = api.hap.uuid.generate(`${item.UUID}`);
-                        const existingAccessory: PlatformAccessory = this.myAccessories.find( accessory => accessory.UUID === accUUID)!;
-                        if (existingAccessory) {
-                            new Humidifier(this, existingAccessory);
-                        } else {
-                            const accessory: PlatformAccessory = new this.api.platformAccessory(`Humidifier UUID: ${item.UUID}`, accUUID);
-                            accessory.context.IP = item.IP;
-                            accessory.context.name = `Humidifier UUID: ${item.UUID}`;
-                            accessory.context.UUID = item.UUID;
-                            new Humidifier(this, accessory);
-                            this.configureAccessory(accessory);
-                            this.api.registerPlatformAccessories('homebridge-remote-ir-test', `${this.config.name}`, [accessory]);
-                        }
+                        this.addAccessory('Humidifier', Humidifier, item);
                         break;
                     }
                     case '05': {
-                        const accUUID = api.hap.uuid.generate(`${item.UUID}`);
-                        const existingAccessory: PlatformAccessory = this.myAccessories.find( accessory => accessory.UUID === accUUID)!;
-                        if (existingAccessory) {
-                            new AirPurifier(this, existingAccessory);
-                        } else {
-                            const accessory: PlatformAccessory = new this.api.platformAccessory(`Air Purifier UUID: ${item.UUID}`, accUUID);
-                            accessory.context.IP = item.IP;
-                            accessory.context.name = `Air Purifier UUID: ${item.UUID}`;
-                            accessory.context.UUID = item.UUID;
-                            new AirPurifier(this, accessory);
-                            this.configureAccessory(accessory);
-                            this.api.registerPlatformAccessories('homebridge-remote-ir-test', `${this.config.name}`, [accessory]);
-                        }
+                        this.addAccessory('Air Purifier', AirPurifier, item);
                         break;
                     }
                     case '06': {
-                        const accUUID = api.hap.uuid.generate(`${item.UUID}`);
-                        const existingAccessory: PlatformAccessory = this.myAccessories.find( accessory => accessory.UUID === accUUID)!;
-                        if (existingAccessory) {
-                            new Switch(this, existingAccessory);
-                        } else {
-                            const accessory: PlatformAccessory = new this.api.platformAccessory(`Switch UUID: ${item.UUID}`, accUUID);
-                            accessory.context.IP = item.IP;
-                            accessory.context.name = `Switch UUID: ${item.UUID}`;
-                            accessory.context.UUID = item.UUID;
-                            new Switch(this, accessory);
-                            this.configureAccessory(accessory);
-                            this.api.registerPlatformAccessories('homebridge-remote-ir-test', `${this.config.name}`, [accessory]);
-                        }
+                        this.addAccessory('Switch', Switch, item);
                         break;
                     }
                     case '07': {
-                        const accUUID = api.hap.uuid.generate(`${item.UUID}`);
-                        const existingAccessory: PlatformAccessory = this.myAccessories.find( accessory => accessory.UUID === accUUID)!;
-                        if (existingAccessory) {
-                            new Fan(this, existingAccessory);
-                        } else {
-                            const accessory: PlatformAccessory = new this.api.platformAccessory(`Fan UUID: ${item.UUID}`, accUUID);
-                            accessory.context.IP = item.IP;
-                            accessory.context.name = `Fan UUID: ${item.UUID}`;
-                            accessory.context.UUID = item.UUID;
-                            new Fan(this, accessory);
-                            this.configureAccessory(accessory);
-                            this.api.registerPlatformAccessories('homebridge-remote-ir-test', `${this.config.name}`, [accessory]);
-                        }
+                        this.addAccessory('Fan', Fan, item);
                         break;
                     }
                     default:
@@ -144,6 +99,34 @@ export class Platform implements DynamicPlatformPlugin {
                 }
             });
         });
+    }
+
+    addAccessory(accessoryName: string,
+                 accessory:
+                     typeof TV |
+                     typeof Lightbulb |
+                     typeof Humidifier |
+                     typeof AirPurifier |
+                     typeof Switch |
+                     typeof Fan,
+                 item: Remote): void {
+        const accUUID = this.api.hap.uuid.generate(`${item.UUID}`);
+        const existingAccessory: PlatformAccessory = this.myAccessories.find(accessory => accessory.UUID === accUUID)!;
+        if (existingAccessory) {
+            new accessory(this, existingAccessory);
+        } else {
+            const newAccessory: PlatformAccessory = new this.api.platformAccessory(`${accessoryName} UUID: ${item.UUID}`, accUUID);
+            if (item.Type === '01') {
+            newAccessory.context.deviceInfo = item.deviceInfo;
+            }
+            newAccessory.context.IP = item.IP;
+            newAccessory.context.name = `${accessoryName} UUID: ${item.UUID}`;
+            newAccessory.context.UUID = item.UUID;
+            new accessory(this, newAccessory);
+            this.configureAccessory(newAccessory);
+            this.api.registerPlatformAccessories('homebridge-remote-ir-test', `${this.config.name}`, [newAccessory]);
+
+        }
     }
 
     configureAccessory(accessory: PlatformAccessory): void {

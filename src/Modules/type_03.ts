@@ -1,11 +1,11 @@
-const httpRequest: any = require('../Utilites/httpRequest.js');
+const httpRequest: Function = require('../Utilites/httpRequest.js');
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
 
 export class Lightbulb {
 
     protected readonly service: Service;
-    private readonly currentActiveStatus: boolean;
+    private currentActiveStatus: boolean;
     private readonly name: string;
     private readonly IP: string;
     private readonly uuid: string;
@@ -43,8 +43,7 @@ export class Lightbulb {
     onSetHandler(value: any) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, `${this.path}${this.command}`, value, this.currentActiveStatus, this.msg);
-        return this.currentActiveStatus;
+        this.currentActiveStatus = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 
 }

@@ -35,8 +35,7 @@ var Fan = /** @class */ (function () {
     Fan.prototype.onSetActive = function (value) {
         this.command = value ? '03FF' : '02FF';
         this.msg = 'Power state';
-        httpRequest(this.IP, "" + this.path + this.command, value, this.currentActiveStatus, this.msg);
-        return this.currentActiveStatus;
+        this.currentActiveStatus = httpRequest(this.IP, "" + this.path + this.command, value, this.msg);
     };
     Fan.prototype.onGetSwingMode = function () {
         return this.platform.Characteristic.SwingMode.SWING_DISABLED;
@@ -44,8 +43,7 @@ var Fan = /** @class */ (function () {
     Fan.prototype.onSetSwingMode = function (value) {
         this.command = '0AFF';
         this.msg = 'Swing mode';
-        httpRequest(this.IP, "" + this.path + this.command, value, this.currentSwing, this.msg);
-        return this.currentSwing;
+        this.currentSwing = httpRequest(this.IP, "" + this.path + this.command, value, this.msg);
     };
     Fan.prototype.onGetSpeed = function () {
         return this.currentSpeed;
@@ -53,8 +51,7 @@ var Fan = /** @class */ (function () {
     Fan.prototype.onSetSpeed = function (value) {
         this.command = '0BFF';
         this.msg = 'Rotation speed';
-        httpRequest(this.IP, "" + this.path + this.command, value, this.currentSpeed, this.msg);
-        return this.currentSpeed;
+        this.currentSpeed = httpRequest(this.IP, "" + this.path + this.command, value, this.msg);
     };
     return Fan;
 }());
