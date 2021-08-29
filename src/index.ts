@@ -1,11 +1,11 @@
 const server: any = require('./server');
 
-import {TV} from './Modules/type_01.js';
-import {Lightbulb} from './Modules/type_03.js';
-import {Humidifier} from './Modules/type_04.js';
-import {AirPurifier} from './Modules/type_05.js';
-import {Switch} from './Modules/type_06.js';
-import {Fan} from './Modules/type_07.js';
+import {TV} from './Modules/type_tv.js';
+import {Lightbulb} from './Modules/type_lightBulb.js';
+import {Humidifier} from './Modules/type_humidifier.js';
+import {AirPurifier} from './Modules/type_airPurifier.js';
+import {Switch} from './Modules/type_switch.js';
+import {Fan} from './Modules/type_fan.js';
 
 import {
     DynamicPlatformPlugin,

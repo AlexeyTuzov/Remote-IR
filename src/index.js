@@ -38,12 +38,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Platform = void 0;
 var server = require('./server');
-var type_01_js_1 = require("./Modules/type_01.js");
-var type_03_js_1 = require("./Modules/type_03.js");
-var type_04_js_1 = require("./Modules/type_04.js");
-var type_05_js_1 = require("./Modules/type_05.js");
-var type_06_js_1 = require("./Modules/type_06.js");
-var type_07_js_1 = require("./Modules/type_07.js");
+var type_tv_js_1 = require("./Modules/type_tv.js");
+var type_lightBulb_js_1 = require("./Modules/type_lightBulb.js");
+var type_humidifier_js_1 = require("./Modules/type_humidifier.js");
+var type_airPurifier_js_1 = require("./Modules/type_airPurifier.js");
+var type_switch_js_1 = require("./Modules/type_switch.js");
+var type_fan_js_1 = require("./Modules/type_fan.js");
 module.exports = function (api) {
     api.registerPlatform('homebridge-remote-ir-test', "Platform", Platform);
 };
@@ -89,27 +89,27 @@ var Platform = /** @class */ (function () {
                         remotes.forEach(function (item) {
                             switch (item.Type) {
                                 case '01': {
-                                    _this.addAccessory('TV', type_01_js_1.TV, item);
+                                    _this.addAccessory('TV', type_tv_js_1.TV, item);
                                     break;
                                 }
                                 case '03': {
-                                    _this.addAccessory('Lightbulb', type_03_js_1.Lightbulb, item);
+                                    _this.addAccessory('Lightbulb', type_lightBulb_js_1.Lightbulb, item);
                                     break;
                                 }
                                 case '04': {
-                                    _this.addAccessory('Humidifier', type_04_js_1.Humidifier, item);
+                                    _this.addAccessory('Humidifier', type_humidifier_js_1.Humidifier, item);
                                     break;
                                 }
                                 case '05': {
-                                    _this.addAccessory('Air Purifier', type_05_js_1.AirPurifier, item);
+                                    _this.addAccessory('Air Purifier', type_airPurifier_js_1.AirPurifier, item);
                                     break;
                                 }
                                 case '06': {
-                                    _this.addAccessory('Switch', type_06_js_1.Switch, item);
+                                    _this.addAccessory('Switch', type_switch_js_1.Switch, item);
                                     break;
                                 }
                                 case '07': {
-                                    _this.addAccessory('Fan', type_07_js_1.Fan, item);
+                                    _this.addAccessory('Fan', type_fan_js_1.Fan, item);
                                     break;
                                 }
                                 default:

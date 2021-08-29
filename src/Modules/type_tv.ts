@@ -1,5 +1,5 @@
 const httpRequest: any = require ('../Utilites/httpRequest.js');
-import * as http from 'http';
+//import * as http from 'http';
 import {Service, PlatformAccessory} from "homebridge";
 import {Platform} from "../index.js";
 
@@ -193,12 +193,12 @@ export class TV {
 
     setVolume(value: any) {
         if (value) {
-            this.speakerVolume ++;
+            this.speakerVolume --;
             this.command = '07FF';
             this.msg = 'Volume';
             httpRequest(this.IP, `${this.path}${this.command}`, 'STEP DOWN', this.msg);
         } else {
-            this.speakerVolume --;
+            this.speakerVolume ++;
             this.command = '06FF';
             this.msg = 'Volume';
             httpRequest(this.IP, `${this.path}${this.command}`, 'STEP UP', this.msg);

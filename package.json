@@ -1,21 +1,19 @@
 {
-  "name": "homebridge-remote-ir-test",
-  "version": "1.2.1",
-  "description": "plug-in 4 Homebridge remote IR controller",
+  "name": "homebridge-remote-ir",
+  "version": "1.0.2",
+  "description": "plugin for Homebridge and LOOKin remote IR controller",
   "main": "src/index.js",
   "keywords": [
     "homebridge-plugin"
   ],
   "scripts": {
-    "server": "nodemon src/index.js",
-    "build": "rimraf ./dist && tsc "
+    "server": "nodemon src/index.js"
   },
   "author": "Alexey Tuzov <aresnexus@rambler.ru>",
   "license": "ISC",
   "devDependencies": {
     "homebridge": "^1.3.4",
     "nodemon": "^2.0.12",
-    "rimraf": "^3.0.2",
     "typescript": "^4.3.5"
   },
   "engines": {
