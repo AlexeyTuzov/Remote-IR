@@ -1,6 +1,8 @@
 const httpRequest: Function = require('../Utilites/httpRequest.js');
+import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand.js";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
+import {Functions} from "../index.js";
 
 export class Lightbulb {
 
@@ -9,6 +11,7 @@ export class Lightbulb {
     private readonly name: string;
     private readonly IP: string;
     private readonly uuid: string;
+    private readonly functions: Functions [];
     private readonly path: string;
     private command: string;
     private msg: string;
@@ -17,7 +20,7 @@ export class Lightbulb {
         private readonly platform: Platform,
         private readonly accessory: PlatformAccessory
     ) {
-
+        this.functions = this.accessory.context.deviceInfo.Functions;
         this.currentActiveStatus = false;
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
@@ -41,7 +44,7 @@ export class Lightbulb {
     }
 
     onSetHandler(value: any) {
-        this.command = value ? '03FF' : '02FF';
+        this.command = getPowerSwitchCommand(value, this.functions);
         this.msg = 'Power state';
         this.currentActiveStatus = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }

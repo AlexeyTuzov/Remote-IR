@@ -40,9 +40,7 @@ module.exports = async () => {
                             item.IP = device.IP;
                         });
                         for await (let item of device.savedRC) {
-                            if (item.Type === '01') {
-                                item.deviceInfo = JSON.parse( await getCommands(item.IP, item.UUID));
-                            }
+                            item.deviceInfo = JSON.parse( await getCommands(item.IP, item.UUID));
                         }
                     }
 

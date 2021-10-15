@@ -129,9 +129,7 @@ var Platform = /** @class */ (function () {
         }
         else {
             var newAccessory = new this.api.platformAccessory(accessoryName + " UUID: " + item.UUID, accUUID);
-            if (item.Type === '01') {
-                newAccessory.context.deviceInfo = item.deviceInfo;
-            }
+            newAccessory.context.deviceInfo = item.deviceInfo;
             newAccessory.context.IP = item.IP;
             newAccessory.context.name = accessoryName + " UUID: " + item.UUID;
             newAccessory.context.UUID = item.UUID;

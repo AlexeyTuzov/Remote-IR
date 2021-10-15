@@ -1,11 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TV = void 0;
 var httpRequest = require('../Utilites/httpRequest.js');
+var getPowerSwitchCommand_js_1 = __importDefault(require("../Utilites/getPowerSwitchCommand.js"));
 var TV = /** @class */ (function () {
     function TV(platform, accessory) {
         this.platform = platform;
         this.accessory = accessory;
+        this.functions = this.accessory.context.deviceInfo.Functions;
         this.currentTVActiveStatus = false;
         this.activeIdentifier = 1;
         this.configuredName = this.accessory.context.deviceInfo.Name;
@@ -18,10 +23,6 @@ var TV = /** @class */ (function () {
         this.path = "/commands/ir/localremote/" + this.uuid;
         this.command = '';
         this.msg = '';
-        // interface FunctionsOfDevice {
-        //     Name: string;
-        //     Type: string;
-        // }
         // interface modeResponse {
         //     Type: string;
         //     Signals: any[];
@@ -86,7 +87,7 @@ var TV = /** @class */ (function () {
         return this.currentTVActiveStatus;
     };
     TV.prototype.setTVActiveStatus = function (value) {
-        this.command = value ? '03FF' : '02FF';
+        this.command = getPowerSwitchCommand_js_1.default(value, this.functions);
         this.msg = 'Power state';
         this.currentTVActiveStatus = httpRequest(this.IP, "" + this.path + this.command, value, this.msg);
     };

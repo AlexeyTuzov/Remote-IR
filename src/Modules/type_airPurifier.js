@@ -1,11 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AirPurifier = void 0;
 var httpRequest = require('../Utilites/httpRequest.js');
+var getPowerSwitchCommand_js_1 = __importDefault(require("../Utilites/getPowerSwitchCommand.js"));
 var AirPurifier = /** @class */ (function () {
     function AirPurifier(platform, accessory) {
         this.platform = platform;
         this.accessory = accessory;
+        this.functions = this.accessory.context.deviceInfo.Functions;
         this.currentActiveStatus = false;
         //this.currentState = 0;
         //this.currentSpeed = 0;
@@ -37,7 +42,7 @@ var AirPurifier = /** @class */ (function () {
         return this.currentActiveStatus;
     };
     AirPurifier.prototype.onSetActive = function (value) {
-        this.command = value ? '03FF' : '02FF';
+        this.command = getPowerSwitchCommand_js_1.default(value, this.functions);
         this.msg = 'Power state';
         this.currentActiveStatus = httpRequest(this.IP, "" + this.path + this.command, value, this.msg);
     };

@@ -17,18 +17,6 @@ import {
     PlatformConfig
 } from 'homebridge';
 
-module.exports = (api: any) => {
-    api.registerPlatform('homebridge-remote-ir-test', "Platform", Platform);
-}
-
-interface Remote {
-    Type: string;
-    UUID: string;
-    Updated: number;
-    IP: string;
-    deviceInfo: [] | undefined;
-}
-
 interface ServerAnswer {
     ID: string;
     type: string;
@@ -36,7 +24,32 @@ interface ServerAnswer {
     IP: string;
     autoVersion: string;
     storageVersion: string;
-    savedRC: Remote[];
+    savedRC: Remote [];
+}
+
+interface Remote {
+    Type: string;
+    UUID: string;
+    Updated: number;
+    IP: string;
+    deviceInfo: devInfo [];
+}
+
+interface devInfo {
+    Type: string,
+    Name: string,
+    Updated: string,
+    Status: string | undefined,
+    Functions: Functions []
+}
+
+export interface Functions {
+    Name: string,
+    Type: string
+}
+
+module.exports = (api: any) => {
+    api.registerPlatform('homebridge-remote-ir-test', "Platform", Platform);
 }
 
 async function getSavedRemotes() {
@@ -116,9 +129,7 @@ export class Platform implements DynamicPlatformPlugin {
             new accessory(this, existingAccessory);
         } else {
             const newAccessory: PlatformAccessory = new this.api.platformAccessory(`${accessoryName} UUID: ${item.UUID}`, accUUID);
-            if (item.Type === '01') {
             newAccessory.context.deviceInfo = item.deviceInfo;
-            }
             newAccessory.context.IP = item.IP;
             newAccessory.context.name = `${accessoryName} UUID: ${item.UUID}`;
             newAccessory.context.UUID = item.UUID;

@@ -1,7 +1,9 @@
 const httpRequest: any = require ('../Utilites/httpRequest.js');
+import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand.js";
 //import * as http from 'http';
 import {Service, PlatformAccessory} from "homebridge";
 import {Platform} from "../index.js";
+import {Functions} from "../index.js";
 
 export class TV {
 
@@ -11,6 +13,7 @@ export class TV {
     private readonly name: string;
     private readonly IP: string;
     private readonly uuid: string;
+    private readonly functions: Functions [];
     private currentTVActiveStatus: boolean;
     private activeIdentifier: number;
     private configuredName: string;
@@ -25,6 +28,7 @@ export class TV {
         private readonly platform: Platform,
         private readonly accessory: PlatformAccessory
     ) {
+        this.functions = this.accessory.context.deviceInfo.Functions;
         this.currentTVActiveStatus = false;
         this.activeIdentifier = 1;
         this.configuredName = this.accessory.context.deviceInfo.Name;
@@ -38,10 +42,7 @@ export class TV {
         this.command = '';
         this.msg = '';
 
-        // interface FunctionsOfDevice {
-        //     Name: string;
-        //     Type: string;
-        // }
+
         // interface modeResponse {
         //     Type: string;
         //     Signals: any[];
@@ -120,7 +121,7 @@ export class TV {
     }
 
     setTVActiveStatus(value: any) {
-        this.command = value ? '03FF' : '02FF' ;
+        this.command = getPowerSwitchCommand(value, this.functions);
         this.msg = 'Power state';
         this.currentTVActiveStatus = httpRequest(this.IP, `${this.path}${this.command}`,value, this.msg);
     }
