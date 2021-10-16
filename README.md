@@ -1,5 +1,43 @@
 # Remote-IR
-Homebridge plugin for LOOKin remote controller
 
-To install this plugin, print "npm i homebridge-remote-ir" in command prompt or search "homebridge-remote-ir" using Homebridge GUI.
-You also need to install Homebridge globally (follow the instructions on homebridge page https://github.com/homebridge/homebridge)
+Плагин для сопряжения Homebridge и LOOKin ИК-контроллеров
+
+1). Установите глобально сервер Homebridge следуя инструкции для Вашей операционной системы https://www.npmjs.com/package/homebridge
+
+2). Установите платформу NodeJS версией не ниже 10.17.0 https://nodejs.org
+
+3). Рекомендуется для удобства также установить графический интерфейс для Homebridge https://github.com/oznu/homebridge-config-ui-x
+
+4). Запустите сервер Homebridge следуя инструкции для Вашей операционной системы и поместите его в автозагрузку (см. ссылку в пункте 1)
+
+5). Создайте соединение между Вашим устройством Apple и запущенным сервером Homebridge. Для этого войдите в приложение "Дом", нажмите "+" в правом верхнем углу и добавьте аксессуар 
+(просто отсканировав QR-код в окне графического интерфейса Homebridge или в командной строке) 
+
+6). В директории, куда установлен сервер Homebridge (в случае с ОС Windows 10 это Пользователи/Admin/.homebridge) после первого запуска сервера должен появиться текстовый файл config.json с примерно таким содержимым:
+
+{
+    "bridge": {
+        "name": "Homebridge",
+        "username": "0E:9B:1C:A8:28:B3",
+        "port": 51194,
+        "pin": "346-42-846"
+    },
+    "accessories": [],
+    "platforms": [
+        {
+            "name": "Config",
+            "port": 8591,
+            "platform": "config"
+        }
+    ]
+}
+
+7). Зайдите в окно графического интерфейса Homebridge в браузере. Для этого в поисковой строке введите http://localhost:<НОМЕР ПОРТА>/login. Для примера выше это будет http://localhost:8591/login
+логин и пароль для входа по умолчанию - admin.
+
+8). Войдите во вкладку Плагины и установите плагин homebridge-remote-ir. Затем добавьте новый аксессуар. Имя можно ввести произвольное. 
+После этого должна появиться ещё одна запись в файле config.json в графе "platforms".
+
+9). В приложении LOOKin добавьте необходимые пульты для Ваших устройств (для этого нажмите "+" в правом верхнем углу экрана в приложении). Обязательно укажите тип устройства.
+
+10). Перезапустите сервер Homebridge и ИК-контроллер LOOKin. Может потребоваться 5-10 минут до появления в приложении "Дом" всех сохранённых в приложении LOOKin пультов устройств. 
