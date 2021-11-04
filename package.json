@@ -1,13 +1,14 @@
 {
   "name": "homebridge-lookin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "plugin for Homebridge and LOOKin remote IR controller",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "keywords": [
     "homebridge-plugin"
   ],
   "scripts": {
-    "server": "nodemon src/index.js"
+    "server": "nodemon src/index.js",
+    "build": "tsc"
   },
   "author": "Alexey Tuzov <aresnexus@rambler.ru>",
   "license": "ISC",
