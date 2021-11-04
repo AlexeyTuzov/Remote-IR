@@ -5,8 +5,8 @@ module.exports = async () => {
     const getRemoteControllers = require('./Utilites/getRemoteControllers.js');
     const getCommands = require('./Utilites/getCommands.js');
     const PORT = 61201;
+    const ALIVE = /LOOK\.?in:Alive!/;
     const discover = 'LOOK.in:Discover!';
-    const ALIVE = 'LOOK.in:Alive!';
     const IP = '255.255.255.255';
     const devicesArray = [];
 
@@ -19,9 +19,8 @@ module.exports = async () => {
                 console.log(`MESSAGE from remote: ${msg}`);
                 console.log(`from ${rinfo.address}:${rinfo.port}`);
 
-                if (msg.includes(ALIVE)) {
-                    let alivePayload = msg.toString().slice(ALIVE.length);
-
+                if (msg.toString().match(ALIVE)) {
+                    let alivePayload = msg.toString().replace(ALIVE, '');
                     let info = parseRemotesAnswer(alivePayload);
                     let device = {
                         ID: info[0],
@@ -71,3 +70,4 @@ module.exports = async () => {
     });
 
 }
+

@@ -1,7 +1,7 @@
 const httpRequest: any = require ('../Utilites/httpRequest.js');
-import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand.js";
-//import * as http from 'http';
+import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
 import {Service, PlatformAccessory} from "homebridge";
+
 import {Platform} from "../index.js";
 import {Functions} from "../index.js";
 
@@ -14,7 +14,7 @@ export class TV {
     private readonly IP: string;
     private readonly uuid: string;
     private readonly functions: Functions [];
-    private currentTVActiveStatus: boolean;
+    private currentTVActiveStatus: number;
     private activeIdentifier: number;
     private configuredName: string;
     private speakerMute: boolean;
@@ -23,13 +23,14 @@ export class TV {
     private readonly path: string;
     private command: string;
     private msg: string;
+    private blockPowerOn: boolean;
 
     constructor (
         private readonly platform: Platform,
         private readonly accessory: PlatformAccessory
     ) {
         this.functions = this.accessory.context.deviceInfo.Functions;
-        this.currentTVActiveStatus = false;
+        this.currentTVActiveStatus = 0;
         this.activeIdentifier = 1;
         this.configuredName = this.accessory.context.deviceInfo.Name;
         this.speakerMute = false;
@@ -41,7 +42,7 @@ export class TV {
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
         this.msg = '';
-
+        this.blockPowerOn = false;
 
         // interface modeResponse {
         //     Type: string;
@@ -60,10 +61,10 @@ export class TV {
 
         this.tvService.setCharacteristic(this.platform.Characteristic.ConfiguredName, this.name);
 
+        this.tvService.setCharacteristic(this.platform.Characteristic.SleepDiscoveryMode, this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
+
         this.tvService.getCharacteristic(this.platform.Characteristic.RemoteKey)!
             .onSet(this.remoteKeyCommands.bind(this));
-
-        this.tvService.setCharacteristic(this.platform.Characteristic.SleepDiscoveryMode, this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
 
         this.speakerService.getCharacteristic(this.platform.Characteristic.Mute)!
             .onGet(this.getMuteState.bind(this))
@@ -120,64 +121,67 @@ export class TV {
         return this.currentTVActiveStatus;
     }
 
-    setTVActiveStatus(value: any) {
+    async setTVActiveStatus(value: any) {
+        if (this.blockPowerOn) return;
         this.command = getPowerSwitchCommand(value, this.functions);
         this.msg = 'Power state';
-        this.currentTVActiveStatus = httpRequest(this.IP, `${this.path}${this.command}`,value, this.msg);
+        this.currentTVActiveStatus = await httpRequest(this.IP, `${this.path}${this.command}`,value, this.msg);
     }
 
-    remoteKeyCommands(value: any) {
+    async remoteKeyCommands(value: any) {
+        this.blockPowerOn = true;
         switch (value) {
             case this.platform.Characteristic.RemoteKey.SELECT: {
                 this.command = '0C00';
                 this.msg = 'Cursor';
-                httpRequest(this.IP, `${this.path}${this.command}`, 'SELECT', this.msg);
+                await httpRequest(this.IP, `${this.path}${this.command}`, 'SELECT', this.msg);
                 break;
             }
             case this.platform.Characteristic.RemoteKey.ARROW_UP: {
                 this.command = '0C02';
                 this.msg = 'Cursor';
-                httpRequest(this.IP, `${this.path}${this.command}`, 'ARROW_UP', this.msg);
+                await httpRequest(this.IP, `${this.path}${this.command}`, 'ARROW_UP', this.msg);
                 break;
             }
             case this.platform.Characteristic.RemoteKey.ARROW_DOWN: {
                 this.command = '0C04';
                 this.msg = 'Cursor';
-                httpRequest(this.IP, `${this.path}${this.command}`, 'ARROW_DOWN', this.msg);
+                await httpRequest(this.IP, `${this.path}${this.command}`, 'ARROW_DOWN', this.msg);
                 break;
             }
             case this.platform.Characteristic.RemoteKey.ARROW_LEFT: {
                 this.command = '0C01';
                 this.msg = 'Cursor';
-                httpRequest(this.IP, `${this.path}${this.command}`, 'ARROW_LEFT', this.msg);
+                await httpRequest(this.IP, `${this.path}${this.command}`, 'ARROW_LEFT', this.msg);
                 break;
             }
             case this.platform.Characteristic.RemoteKey.ARROW_RIGHT: {
                 this.command = '0C03';
                 this.msg = 'Cursor';
-                httpRequest(this.IP, `${this.path}${this.command}`, 'ARROW_RIGHT', this.msg);
+                await httpRequest(this.IP, `${this.path}${this.command}`, 'ARROW_RIGHT', this.msg);
                 break;
             }
             case this.platform.Characteristic.RemoteKey.INFORMATION: {
                 this.command = '0DFF';
                 this.msg = 'Menu';
-                httpRequest(this.IP, `${this.path}${this.command}`, 'INFORMATION', this.msg);
+                await httpRequest(this.IP, `${this.path}${this.command}`, 'INFORMATION', this.msg);
                 break;
             }
             case this.platform.Characteristic.RemoteKey.REWIND: {
                 this.command = '09FF';
                 this.msg = 'Channel';
-                httpRequest(this.IP, `${this.path}${this.command}`, 'DOWN', this.msg);
+                await httpRequest(this.IP, `${this.path}${this.command}`, 'DOWN', this.msg);
                 break;
             }
             case this.platform.Characteristic.RemoteKey.FAST_FORWARD: {
                 this.command = '08FF';
                 this.msg = 'Channel';
-                httpRequest(this.IP, `${this.path}${this.command}`, 'UP', this.msg);
+                await httpRequest(this.IP, `${this.path}${this.command}`, 'UP', this.msg);
                 break;
             }
             default: break;
         }
+        setTimeout(() => {this.blockPowerOn = false}, 5000);
     }
 
     //==========================Methods 4 TV Speaker====================================================================
@@ -186,24 +190,28 @@ export class TV {
         return this.speakerMute;
     }
 
-    setMuteState(value: any) {
+    async setMuteState(value: any) {
+        this.blockPowerOn = true;
         this.command = '05FF';
         this.msg = 'Mute state';
-        this.speakerMute = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        this.speakerMute = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        setTimeout(() => {this.blockPowerOn = false}, 5000);
     }
 
-    setVolume(value: any) {
+    async setVolume(value: any) {
+        this.blockPowerOn = true;
         if (value) {
             this.speakerVolume --;
             this.command = '07FF';
             this.msg = 'Volume';
-            httpRequest(this.IP, `${this.path}${this.command}`, 'STEP DOWN', this.msg);
+            await httpRequest(this.IP, `${this.path}${this.command}`, 'STEP DOWN', this.msg);
         } else {
             this.speakerVolume ++;
             this.command = '06FF';
             this.msg = 'Volume';
-            httpRequest(this.IP, `${this.path}${this.command}`, 'STEP UP', this.msg);
+            await httpRequest(this.IP, `${this.path}${this.command}`, 'STEP UP', this.msg);
         }
+        setTimeout(() => {this.blockPowerOn = false}, 5000);
     }
 
     getVolume () {

@@ -1,5 +1,5 @@
 const httpRequest: any = require('../Utilites/httpRequest.js');
-import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand.js";
+import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
 import {Functions} from "../index.js";
@@ -7,7 +7,7 @@ import {Functions} from "../index.js";
 export class Fan {
 
     protected readonly service: Service;
-    private currentActiveStatus: boolean;
+    private currentActiveStatus: number;
     private currentSwing: number;
     private currentSpeed: number;
     private readonly name: string;
@@ -23,7 +23,7 @@ export class Fan {
         private readonly accessory: PlatformAccessory
     ) {
         this.functions = this.accessory.context.deviceInfo.Functions;
-        this.currentActiveStatus = false;
+        this.currentActiveStatus = 0;
         this.currentSwing = 0;
         this.currentSpeed = 0;
         this.name = this.accessory.context.name;
@@ -56,29 +56,30 @@ export class Fan {
         return this.currentActiveStatus;
     }
 
-    onSetActive(value: any) {
+    async onSetActive(value: any) {
+        if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(value, this.functions);
         this.msg = 'Power state';
-        this.currentActiveStatus = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        this.currentActiveStatus = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 
     onGetSwingMode () {
         return this.platform.Characteristic.SwingMode.SWING_DISABLED;
     }
 
-    onSetSwingMode (value: any) {
+    async onSetSwingMode (value: any) {
         this.command = '0AFF';
         this.msg = 'Swing mode';
-        this.currentSwing = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        this.currentSwing = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 
     onGetSpeed () {
         return this.currentSpeed;
     }
 
-    onSetSpeed (value: any) {
+    async onSetSpeed (value: any) {
         this.command = '0BFF';
         this.msg = 'Rotation speed';
-        this.currentSpeed = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        this.currentSpeed = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 }

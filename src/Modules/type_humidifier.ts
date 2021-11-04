@@ -1,5 +1,5 @@
 const httpRequest: any = require('../Utilites/httpRequest.js');
-import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand.js";
+import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
 import {Functions} from "../index.js";
@@ -7,7 +7,7 @@ import {Functions} from "../index.js";
 export class Humidifier {
 
     protected readonly service: Service;
-    private currentActiveStatus: boolean;
+    private currentActiveStatus: number;
     //private currentHDState: number;
     private readonly name: string;
     private readonly IP: string;
@@ -22,7 +22,7 @@ export class Humidifier {
         private readonly accessory: PlatformAccessory
     ) {
         this.functions = this.accessory.context.deviceInfo.Functions;
-        this.currentActiveStatus = false;
+        this.currentActiveStatus = 0;
         //this.currentHDState = 0;
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
@@ -54,10 +54,11 @@ export class Humidifier {
         return this.currentActiveStatus;
     }
 
-    onSetActive(value: any) {
+    async onSetActive(value: any) {
+        if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(value, this.functions);
         this.msg = 'Power state';
-        this.currentActiveStatus = httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        this.currentActiveStatus = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
     }
 
     //onGetHDState () {
@@ -69,11 +70,10 @@ export class Humidifier {
     //    return this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER;
     //}
 
-    //onSetTargetState (value: any) {
+    //async onSetTargetState (value: any) {
     //    this.command = '04FF';
     //    this.msg = 'Humidifier-Dehumidifier mode';
-    //    this.currentHDState = httpRequest(this.IP, this.path, value, this.msg);
-    //    return this.currentHDState;
+    //    this.currentHDState = await httpRequest(this.IP, this.path, value, this.msg);
     //}
 
 }
