@@ -1,5 +1,6 @@
-const server: any = require('./server');
-
+import UDPserver from './Utilites/UDPserver';
+import getSavedRemoteControllers from './Utilites/getSavedRemoteControllers';
+import { Device, RCInfo, RemoteController } from './Utilites/interfaces';
 import {TV} from './Modules/type_tv';
 import {Lightbulb} from './Modules/type_lightBulb';
 import {Humidifier} from './Modules/type_humidifier';
@@ -17,48 +18,8 @@ import {
     PlatformConfig
 } from 'homebridge';
 
-interface ServerAnswer {
-    ID: string;
-    type: string;
-    onBatteries: string;
-    IP: string;
-    autoVersion: string;
-    storageVersion: string;
-    savedRC: Remote [];
-}
-
-interface Remote {
-    Type: string;
-    UUID: string;
-    Updated: number;
-    IP: string;
-    deviceInfo: devInfo [];
-}
-
-interface devInfo {
-    Type: string,
-    Name: string,
-    Updated: string,
-    Status: string | undefined,
-    Functions: Functions []
-}
-
-export interface Functions {
-    Name: string,
-    Type: string
-}
-
 module.exports = (api: any) => {
     api.registerPlatform('homebridge-remote-ir-test', "Platform", Platform);
-}
-
-async function getSavedRemotes() {
-    const info: ServerAnswer[] = await server();
-    let remotes: Remote[] = [];
-    info.forEach(item => {
-        remotes.push(...item.savedRC);
-    });
-    return remotes;
 }
 
 export class Platform implements DynamicPlatformPlugin {
@@ -79,9 +40,10 @@ export class Platform implements DynamicPlatformPlugin {
         this.Characteristic = this.api.hap.Characteristic;
 
         this.api.on('didFinishLaunching', async () => {
-            const remotes: Remote[] = await getSavedRemotes();
+            let deviceInfo: Device = await UDPserver();
+            const remotes: RemoteController[] = await getSavedRemoteControllers(deviceInfo.IP);
             this.log.info('REMOTES:', remotes);
-            remotes.forEach(item => {
+            remotes.forEach( item => {
                 switch (item.Type) {
                     case '01': {
                         this.addAccessory('TV', TV, item);
@@ -122,7 +84,7 @@ export class Platform implements DynamicPlatformPlugin {
                      typeof AirPurifier |
                      typeof Switch |
                      typeof Fan,
-                 item: Remote): void {
+                 item: RemoteController): void {
         const accUUID = this.api.hap.uuid.generate(`${item.UUID}`);
         const existingAccessory: PlatformAccessory = this.myAccessories.find(accessory => accessory.UUID === accUUID)!;
         if (existingAccessory) {
