@@ -1,6 +1,6 @@
 {
   "name": "homebridge-lookin",
-  "version": "1.0.5",
+  "version": "1.0.8",
   "description": "plugin for Homebridge and LOOKin remote IR controller",
   "main": "dist/index.js",
   "keywords": [

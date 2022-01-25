@@ -1,11 +1,10 @@
 import httpRequest from "../Utilites/httpRequest";
 import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
 import getStatus from "../Utilites/getStatus";
-import getFunctions from "../Utilites/getFunctions";
+import listenToUpdates from "../Utilites/listenToUpdates";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
 import {Functions} from "../Utilites/interfaces";
-import {emitter} from '../Utilites/UDPserver';
 
 export class AirPurifier {
 
@@ -42,21 +41,7 @@ export class AirPurifier {
 
         this.service.setCharacteristic(this.platform.Characteristic.TargetAirPurifierState, this.platform.Characteristic.TargetAirPurifierState.AUTO);
 
-        const STATUS_UPDATE_EXPRESSION = String.raw`LOOK\.?in:Updated!${this.ID}:87:FE:${this.uuid}`;
-        emitter.on('updated_status', async (msg: string) => {
-            if (msg.match(RegExp(STATUS_UPDATE_EXPRESSION))) {
-                this.currentActiveStatus = await getStatus(this.IP, this.uuid);
-                console.log(`${this.uuid} status now: ${this.currentActiveStatus}`);
-            }
-        });
-
-        const DATA_UPGRADE_EXPRESSION = String.raw`LOOK\.?in:Updated!${this.ID}:data:${this.uuid}`;
-        emitter.on('updated_data', async (msg: string) => {
-            if (msg.match(RegExp(DATA_UPGRADE_EXPRESSION))) {
-                this.functions = await getFunctions(this.IP, this.uuid);
-                console.log(`${this.uuid} functions now: ${this.functions}`);
-            }
-        });
+        listenToUpdates(this, this.ID, this.uuid, this.IP);
     }
 
     getServices() {

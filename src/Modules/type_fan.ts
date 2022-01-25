@@ -1,5 +1,7 @@
 import httpRequest from "../Utilites/httpRequest";
 import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
+import getStatus from "../Utilites/getStatus";
+import listenToUpdates from "../Utilites/listenToUpdates";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
 import {Functions} from "../Utilites/interfaces";
@@ -13,8 +15,9 @@ export class Fan {
     private readonly name: string;
     private readonly IP: string;
     private readonly uuid: string;
-    private readonly functions: Functions [];
+    private functions: Functions [];
     private readonly path: string;
+    private readonly ID: string;
     private command: string;
     private msg: string;
 
@@ -29,6 +32,7 @@ export class Fan {
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
         this.uuid = this.accessory.context.UUID;
+        this.ID = this.accessory.context.ID;
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
         this.msg = '';
@@ -46,13 +50,16 @@ export class Fan {
         this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)!
             .onGet(this.onGetSpeed.bind(this))
             .onSet(this.onSetSpeed.bind(this));
+
+        listenToUpdates(this, this.ID, this.uuid, this.IP);
     }
 
     getServices() {
         return [this.service];
     }
 
-    onGetActive() {
+    async onGetActive() {
+        this.currentActiveStatus = await getStatus(this.IP, this.uuid);
         return this.currentActiveStatus;
     }
 
