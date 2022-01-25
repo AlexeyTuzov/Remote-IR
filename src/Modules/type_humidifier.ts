@@ -1,14 +1,13 @@
-const httpRequest: any = require('../Utilites/httpRequest.js');
+import httpRequest from "../Utilites/httpRequest";
 import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
-import {Functions} from "../index.js";
+import {Functions} from "../Utilites/interfaces";
 
 export class Humidifier {
 
     protected readonly service: Service;
     private currentActiveStatus: number;
-    //private currentHDState: number;
     private readonly name: string;
     private readonly IP: string;
     private readonly uuid: string;
@@ -23,7 +22,6 @@ export class Humidifier {
     ) {
         this.functions = this.accessory.context.deviceInfo.Functions;
         this.currentActiveStatus = 0;
-        //this.currentHDState = 0;
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
         this.uuid = this.accessory.context.UUID;
@@ -36,14 +34,6 @@ export class Humidifier {
         this.service.getCharacteristic(this.platform.Characteristic.Active)!
             .onGet(this.onGetActive.bind(this))
             .onSet(this.onSetActive.bind(this));
-
-        // ============the following functionality has not been realised yet============================================
-        //this.service.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)!
-        //    .onGet(this.onGetHDState.bind(this));
-
-        //this.service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState)!
-        //    .onGet(this.onGetTargetState.bind(this))
-        //    .onSet(this.onSetTargetState.bind(this));
     }
 
     getServices() {
@@ -58,22 +48,11 @@ export class Humidifier {
         if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(value, this.functions);
         this.msg = 'Power state';
-        this.currentActiveStatus = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        try {
+            await httpRequest(this.IP, `${this.path}${this.command}`);
+            this.currentActiveStatus = value;
+        } catch (e: any) {
+            console.log(e.stack);
+        }
     }
-
-    //onGetHDState () {
-    //    return this.platform.Characteristic.CurrentHumidifierDehumidifierState.INACTIVE;
-    //}
-
-    //onGetTargetState () {
-    //    console.log(`Target H-D Mode: ${this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER}`);
-    //    return this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER;
-    //}
-
-    //async onSetTargetState (value: any) {
-    //    this.command = '04FF';
-    //    this.msg = 'Humidifier-Dehumidifier mode';
-    //    this.currentHDState = await httpRequest(this.IP, this.path, value, this.msg);
-    //}
-
 }

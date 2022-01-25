@@ -26,6 +26,7 @@ export class Platform implements DynamicPlatformPlugin {
 
     public readonly Service: typeof Service = this.api.hap.Service;
     public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
+    private ID: string;
 
     constructor(
         public readonly log: Logger,
@@ -38,10 +39,12 @@ export class Platform implements DynamicPlatformPlugin {
         this.api = api;
         this.myAccessories = [];
         this.Characteristic = this.api.hap.Characteristic;
+        this.ID = '';
 
         this.api.on('didFinishLaunching', async () => {
-            let deviceInfo: Device = await UDPserver();
-            const remotes: RemoteController[] = await getSavedRemoteControllers(deviceInfo.IP);
+            let device: Device = await UDPserver();
+            this.ID = device.ID;
+            const remotes: RemoteController[] = await getSavedRemoteControllers(device.IP);
             this.log.info('REMOTES:', remotes);
             remotes.forEach( item => {
                 switch (item.Type) {
@@ -93,6 +96,7 @@ export class Platform implements DynamicPlatformPlugin {
             const newAccessory: PlatformAccessory = new this.api.platformAccessory(`${accessoryName} UUID: ${item.UUID}`, accUUID);
             newAccessory.context.deviceInfo = item.deviceInfo;
             newAccessory.context.IP = item.IP;
+            newAccessory.context.ID = this.ID;
             newAccessory.context.name = `${accessoryName} UUID: ${item.UUID}`;
             newAccessory.context.UUID = item.UUID;
             new accessory(this, newAccessory);
@@ -101,7 +105,6 @@ export class Platform implements DynamicPlatformPlugin {
 
         }
     }
-
     configureAccessory(accessory: PlatformAccessory): void {
         this.myAccessories.push(accessory);
     }

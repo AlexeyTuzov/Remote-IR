@@ -1,8 +1,8 @@
-const httpRequest: Function = require('../Utilites/httpRequest.js');
+import httpRequest from "../Utilites/httpRequest";
 import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
-import {Functions} from "../index.js";
+import {Functions} from "../Utilites/interfaces";
 
 export class Lightbulb {
 
@@ -47,8 +47,12 @@ export class Lightbulb {
         if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(value, this.functions);
         this.msg = 'Power state';
-        this.currentActiveStatus = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        try {
+            await httpRequest(this.IP, `${this.path}${this.command}`);
+            this.currentActiveStatus = value;
+        } catch (e: any) {
+            console.log(e.stack);
+        }
     }
-
 }
 

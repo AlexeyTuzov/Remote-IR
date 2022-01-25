@@ -1,8 +1,8 @@
-const httpRequest: any = require('../Utilites/httpRequest.js');
+import httpRequest from "../Utilites/httpRequest";
 import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
-import {Functions} from "../index.js";
+import {Functions} from "../Utilites/interfaces";
 
 export class Fan {
 
@@ -60,7 +60,12 @@ export class Fan {
         if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(value, this.functions);
         this.msg = 'Power state';
-        this.currentActiveStatus = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        try {
+            await httpRequest(this.IP, `${this.path}${this.command}`);
+            this.currentActiveStatus = value;
+        } catch (e: any) {
+            console.log(e.stack);
+        }
     }
 
     onGetSwingMode () {
@@ -70,7 +75,13 @@ export class Fan {
     async onSetSwingMode (value: any) {
         this.command = '0AFF';
         this.msg = 'Swing mode';
-        this.currentSwing = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        try {
+            await httpRequest(this.IP, `${this.path}${this.command}`);
+            this.currentSwing = value;
+        } catch (e: any) {
+            console.log(e.stack);
+        }
+
     }
 
     onGetSpeed () {
@@ -80,6 +91,11 @@ export class Fan {
     async onSetSpeed (value: any) {
         this.command = '0BFF';
         this.msg = 'Rotation speed';
-        this.currentSpeed = await httpRequest(this.IP, `${this.path}${this.command}`, value, this.msg);
+        try {
+            await httpRequest(this.IP, `${this.path}${this.command}`);
+            this.currentSpeed = value;
+        } catch (e: any) {
+            console.log(e.stack);
+        }
     }
 }
