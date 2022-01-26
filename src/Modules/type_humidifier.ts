@@ -1,5 +1,7 @@
 import httpRequest from "../Utilites/httpRequest";
 import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
+import getStatus from "../Utilites/getStatus";
+import listenToUpdates from "../Utilites/listenToUpdates";
 import {Service, PlatformAccessory} from 'homebridge';
 import {Platform} from '../index.js';
 import {Functions} from "../Utilites/interfaces";
@@ -13,8 +15,8 @@ export class Humidifier {
     private readonly uuid: string;
     private readonly functions: Functions [];
     private readonly path: string;
+    private readonly ID: string;
     private command: string;
-    private msg: string;
 
     constructor(
         private readonly platform: Platform,
@@ -25,29 +27,31 @@ export class Humidifier {
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
         this.uuid = this.accessory.context.UUID;
+        this.ID = this.accessory.context.ID;
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
-        this.msg = '';
 
         this.service = this.accessory.getService(this.platform.Service.HumidifierDehumidifier) || this.accessory.addService(this.platform.Service.HumidifierDehumidifier);
 
         this.service.getCharacteristic(this.platform.Characteristic.Active)!
             .onGet(this.onGetActive.bind(this))
             .onSet(this.onSetActive.bind(this));
+
+            listenToUpdates(this, this.ID, this.uuid, this.IP);
     }
 
     getServices() {
         return [this.service];
     }
 
-    onGetActive() {
+    async onGetActive() {
+        this.currentActiveStatus = await getStatus(this.IP, this.uuid);
         return this.currentActiveStatus;
     }
 
     async onSetActive(value: any) {
         if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(value, this.functions);
-        this.msg = 'Power state';
         try {
             await httpRequest(this.IP, `${this.path}${this.command}`);
             this.currentActiveStatus = value;

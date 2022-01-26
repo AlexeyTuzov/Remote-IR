@@ -1,8 +1,10 @@
 import httpRequest from "../Utilites/httpRequest";
 import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
-import {Service, PlatformAccessory} from 'homebridge';
-import {Platform} from '../index.js';
-import {Functions} from "../Utilites/interfaces";
+import getStatus from "../Utilites/getStatus";
+import listenToUpdates from "../Utilites/listenToUpdates";
+import { Service, PlatformAccessory } from 'homebridge';
+import { Platform } from '../index.js';
+import { Functions } from "../Utilites/interfaces";
 
 export class Lightbulb {
 
@@ -11,10 +13,10 @@ export class Lightbulb {
     private readonly name: string;
     private readonly IP: string;
     private readonly uuid: string;
-    private readonly functions: Functions [];
+    private readonly functions: Functions[];
     private readonly path: string;
+    private readonly ID: string;
     private command: string;
-    private msg: string;
 
     constructor(
         private readonly platform: Platform,
@@ -25,28 +27,31 @@ export class Lightbulb {
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
         this.uuid = this.accessory.context.UUID;
+        this.ID = this.accessory.context.ID;
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
-        this.msg = '';
+
         this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
 
         this.service.getCharacteristic(this.platform.Characteristic.On)!
             .onGet(this.onGetHandler.bind(this))
             .onSet(this.onSetHandler.bind(this));
+
+        listenToUpdates(this, this.ID, this.uuid, this.IP);
     }
 
     getServices() {
         return [this.service];
     }
 
-    onGetHandler() {
+    async onGetHandler() {
+        this.currentActiveStatus = await getStatus(this.IP, this.uuid);
         return this.currentActiveStatus;
     }
 
     async onSetHandler(value: any) {
         if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(value, this.functions);
-        this.msg = 'Power state';
         try {
             await httpRequest(this.IP, `${this.path}${this.command}`);
             this.currentActiveStatus = value;

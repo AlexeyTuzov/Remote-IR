@@ -1,5 +1,7 @@
 import httpRequest from "../Utilites/httpRequest";
 import getPowerSwitchCommand from "../Utilites/getPowerSwitchCommand";
+import getStatus from "../Utilites/getStatus";
+import listenToUpdates from "../Utilites/listenToUpdates";
 import {Service, PlatformAccessory} from "homebridge";
 import {Platform} from "../index.js";
 import {Functions} from "../Utilites/interfaces";
@@ -19,8 +21,8 @@ export class TV {
     private speakerActive: number;
     private speakerVolume: number;
     private readonly path: string;
+    private readonly ID: string;
     private command: string;
-    private msg: string;
     private blockPowerOn: boolean;
 
     constructor (
@@ -37,9 +39,9 @@ export class TV {
         this.name = this.accessory.context.name;
         this.IP = this.accessory.context.IP;
         this.uuid = this.accessory.context.UUID;
+        this.ID = this.accessory.context.ID;
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
-        this.msg = '';
         this.blockPowerOn = false;
 
         this.tvService = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
@@ -69,6 +71,8 @@ export class TV {
 
         this.speakerService.getCharacteristic(this.platform.Characteristic.Volume)!
             .onGet(this.getVolume.bind(this));
+
+        listenToUpdates(this, this.ID, this.uuid, this.IP);
     }
 
      getServices() {
@@ -76,14 +80,14 @@ export class TV {
      }
 
     //=========================Methods 4 TV Service=====================================================================
-    getTVActiveStatus() {
+    async getTVActiveStatus() {
+        this.currentTVActiveStatus = await getStatus(this.IP, this.uuid);
         return this.currentTVActiveStatus;
     }
 
     async setTVActiveStatus(value: any) {
         if (this.blockPowerOn) return;
         this.command = getPowerSwitchCommand(value, this.functions);
-        this.msg = 'Power state';
         try {
             await httpRequest(this.IP, `${this.path}${this.command}`);
             this.currentTVActiveStatus = value;
@@ -97,50 +101,74 @@ export class TV {
         switch (value) {
             case this.platform.Characteristic.RemoteKey.SELECT: {
                 this.command = '0C00';
-                this.msg = 'Cursor';
-                await httpRequest(this.IP, `${this.path}${this.command}`);
+                try {
+                    await httpRequest(this.IP, `${this.path}${this.command}`);
+                } catch (e: any) {
+                    console.log(e.stack);
+                }
                 break;
             }
             case this.platform.Characteristic.RemoteKey.ARROW_UP: {
                 this.command = '0C02';
-                this.msg = 'Cursor';
-                await httpRequest(this.IP, `${this.path}${this.command}`);
+                try {
+                    await httpRequest(this.IP, `${this.path}${this.command}`);
+                } catch (e: any) {
+                    console.log(e.stack);
+                }
                 break;
             }
             case this.platform.Characteristic.RemoteKey.ARROW_DOWN: {
                 this.command = '0C04';
-                this.msg = 'Cursor';
-                await httpRequest(this.IP, `${this.path}${this.command}`);
+                try {
+                    await httpRequest(this.IP, `${this.path}${this.command}`);
+                } catch (e: any) {
+                    console.log(e.stack);
+                }
                 break;
             }
             case this.platform.Characteristic.RemoteKey.ARROW_LEFT: {
                 this.command = '0C01';
-                this.msg = 'Cursor';
-                await httpRequest(this.IP, `${this.path}${this.command}`);
+                try {
+                    await httpRequest(this.IP, `${this.path}${this.command}`);
+                } catch (e: any) {
+                    console.log(e.stack);
+                }
                 break;
             }
             case this.platform.Characteristic.RemoteKey.ARROW_RIGHT: {
                 this.command = '0C03';
-                this.msg = 'Cursor';
-                await httpRequest(this.IP, `${this.path}${this.command}`);
+                try {
+                    await httpRequest(this.IP, `${this.path}${this.command}`);
+                } catch (e: any) {
+                    console.log(e.stack);
+                }
                 break;
             }
             case this.platform.Characteristic.RemoteKey.INFORMATION: {
                 this.command = '0DFF';
-                this.msg = 'Menu';
-                await httpRequest(this.IP, `${this.path}${this.command}`);
+                try {
+                    await httpRequest(this.IP, `${this.path}${this.command}`);
+                } catch (e: any) {
+                    console.log(e.stack);
+                }
                 break;
             }
             case this.platform.Characteristic.RemoteKey.REWIND: {
                 this.command = '09FF';
-                this.msg = 'Channel';
-                await httpRequest(this.IP, `${this.path}${this.command}`);
+                try {
+                    await httpRequest(this.IP, `${this.path}${this.command}`);
+                } catch (e: any) {
+                    console.log(e.stack);
+                }
                 break;
             }
             case this.platform.Characteristic.RemoteKey.FAST_FORWARD: {
                 this.command = '08FF';
-                this.msg = 'Channel';
-                await httpRequest(this.IP, `${this.path}${this.command}`);
+                try {
+                    await httpRequest(this.IP, `${this.path}${this.command}`);
+                } catch (e: any) {
+                    console.log(e.stack);
+                }
                 break;
             }
             default: break;
@@ -157,7 +185,6 @@ export class TV {
     async setMuteState(value: any) {
         this.blockPowerOn = true;
         this.command = '05FF';
-        this.msg = 'Mute state';
         try {
             await httpRequest(this.IP, `${this.path}${this.command}`);
             this.speakerMute = value;
@@ -171,7 +198,6 @@ export class TV {
         this.blockPowerOn = true;
         if (value) {
             this.command = '07FF';
-            this.msg = 'Volume';
             try {
                 await httpRequest(this.IP, `${this.path}${this.command}`);
                 this.speakerVolume--;
@@ -182,7 +208,6 @@ export class TV {
         } else {
 
             this.command = '06FF';
-            this.msg = 'Volume';
             try {
                 await httpRequest(this.IP, `${this.path}${this.command}`);
                 this.speakerVolume++;

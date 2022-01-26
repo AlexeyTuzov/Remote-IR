@@ -2,7 +2,7 @@ import {emitter} from "./UDPserver";
 import getStatus from "./getStatus";
 import getFunctions from "./getFunctions";
 
-const listenToUpdates = (RC: any, ID: string, UUID: string, IP: string) => {
+const listenToUpdates = (RC: any, ID: string, UUID: string, IP: string): void => {
     const STATUS_UPDATE_EXPRESSION = String.raw`LOOK\.?in:Updated!${ID}:87:FE:${UUID}`;
     emitter.on('updated_status', async (msg: string) => {
         if (msg.match(RegExp(STATUS_UPDATE_EXPRESSION))) {

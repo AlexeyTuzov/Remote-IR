@@ -17,7 +17,6 @@ export class AirPurifier {
     private readonly path: string;
     private readonly ID: string;
     private command: string;
-    private msg: string;
 
     constructor(
         private readonly platform: Platform,
@@ -31,7 +30,6 @@ export class AirPurifier {
         this.ID = this.accessory.context.ID;
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
-        this.msg = '';
 
         this.service = this.accessory.getService(this.platform.Service.AirPurifier) || this.accessory.addService(this.platform.Service.AirPurifier);
 
@@ -56,7 +54,6 @@ export class AirPurifier {
     async onSetActive(value: any) {
         if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(!!value, this.functions);
-        this.msg = 'Power state';
         try {
             await httpRequest(this.IP, `${this.path}${this.command}`);
             this.currentActiveStatus = value;

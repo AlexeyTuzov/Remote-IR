@@ -19,7 +19,6 @@ export class Fan {
     private readonly path: string;
     private readonly ID: string;
     private command: string;
-    private msg: string;
 
     constructor(
         private readonly platform: Platform,
@@ -35,7 +34,6 @@ export class Fan {
         this.ID = this.accessory.context.ID;
         this.path = `/commands/ir/localremote/${this.uuid}`;
         this.command = '';
-        this.msg = '';
 
         this.service = this.accessory.getService(this.platform.Service.Fanv2) || this.accessory.addService(this.platform.Service.Fanv2);
 
@@ -66,7 +64,6 @@ export class Fan {
     async onSetActive(value: any) {
         if (value && this.currentActiveStatus) return;
         this.command = getPowerSwitchCommand(value, this.functions);
-        this.msg = 'Power state';
         try {
             await httpRequest(this.IP, `${this.path}${this.command}`);
             this.currentActiveStatus = value;
@@ -81,7 +78,6 @@ export class Fan {
 
     async onSetSwingMode (value: any) {
         this.command = '0AFF';
-        this.msg = 'Swing mode';
         try {
             await httpRequest(this.IP, `${this.path}${this.command}`);
             this.currentSwing = value;
@@ -97,7 +93,6 @@ export class Fan {
 
     async onSetSpeed (value: any) {
         this.command = '0BFF';
-        this.msg = 'Rotation speed';
         try {
             await httpRequest(this.IP, `${this.path}${this.command}`);
             this.currentSpeed = value;
