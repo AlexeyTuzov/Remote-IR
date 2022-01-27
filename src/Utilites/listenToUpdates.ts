@@ -7,7 +7,6 @@ const listenToUpdates = (RC: any, ID: string, UUID: string, IP: string): void =>
     emitter.on('updated_status', async (msg: string) => {
         if (msg.match(RegExp(STATUS_UPDATE_EXPRESSION))) {
             RC.currentActiveStatus = await getStatus(IP, UUID);
-            console.log(`${UUID} status now: ${RC.currentActiveStatus}`);
         }
     });
 
@@ -15,7 +14,6 @@ const listenToUpdates = (RC: any, ID: string, UUID: string, IP: string): void =>
     emitter.on('updated_data', async (msg: string) => {
         if (msg.match(RegExp(DATA_UPGRADE_EXPRESSION))) {
             RC.functions = await getFunctions(IP, UUID);
-            console.log(`${UUID} functions now: ${RC.functions}`);
         }
     });
 }
